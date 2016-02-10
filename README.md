@@ -5,6 +5,12 @@ The write_onos is a collectd plugin that writes obtained values to ONOS collecto
   Collectd 5.4 or later (for the Python plugin)
   Python 2.7 or later (Note: pyCurl also is required to interface libcurl)
   A running ONOS collector service
+
+# Collectd Installation
+
+Debian packages:
+  
+    apt-get install collectd
   
 # Version Information
   collectd write_onos does not currently maintain release versions. The policy is that the master branch should always be stable and production ready.
