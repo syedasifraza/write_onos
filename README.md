@@ -25,5 +25,27 @@ The write_onos is a collectd plugin that writes obtained values to ONOS collecto
   
     networks: You can define the list of interfaces for metrics here.  (e.g. ["eth0", "eth1"])
   
+# Example
+
+  The following is an example Collectd configuration for this plugin:
   
+    <LoadPlugin python>
+        Globals true
+    </LoadPlugin>
+
+    <Plugin python>
+        ModulePath "/etc/collectd/modules/"
+        LogTraces true
+        Interactive false
+        Import "write_onos"
+      <Module write_onos>
+         host "192.168.1.5"
+         port "8181"
+         user "karaf"
+         password "karaf"
+         disks ["sda1", "sda2", "sda5"]
+         networks ["eth0", "eth1"]
+      </Module>
+    </Plugin>
+
   
