@@ -28,7 +28,15 @@ The write_onos is a collectd plugin that writes obtained values to ONOS collecto
 # Example
 
   The following is an example Collectd configuration for this plugin:
-  
+
+    Interval 60
+    LoadPlugin interface
+    LoadPlugin load
+    LoadPlugin cpu
+    LoadPlugin memory
+    LoadPlugin disk
+    LoadPlugin python
+
     <LoadPlugin python>
         Globals true
     </LoadPlugin>
@@ -48,4 +56,15 @@ The write_onos is a collectd plugin that writes obtained values to ONOS collecto
       </Module>
     </Plugin>
 
-  
+    <Plugin cpu>
+        ReportByState true
+        ReportByCpu false
+        ValuesPercentage false
+    </Plugin>
+
+
+# Operational Notes
+
+  The plugin needs to parse Collectd cpu, load, memory, disk and network plugin data. It is therefore, we need to enable these plugins with the config file of collectd alogn with write_onos.
+
+
