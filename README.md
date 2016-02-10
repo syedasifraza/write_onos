@@ -65,6 +65,6 @@ The write_onos is a collectd plugin that writes obtained values to ONOS collecto
 
 # Operational Notes
 
-    The plugin needs to parse Collectd cpu, load, memory, disk and network plugin data. It is therefore, we need to enable these plugins with the config file of collectd alogn with write_onos. Please give correct moudule path in collectd config file, in above example the "write_onos.py" file is located in /etc/collectd/module folder.
+  The plugin needs to parse Collectd cpu, load, memory, disk and network plugin data. It is therefore, we need to enable these plugins with the config file of collectd alogn with write_onos. Please give correct moudule path in collectd config file, in above example the "write_onos.py" file is located in /etc/collectd/module folder.
 
 
