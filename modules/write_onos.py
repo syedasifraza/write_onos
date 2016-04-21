@@ -5,6 +5,7 @@ import cStringIO
 import ast
 import time
 import re
+import logging
 
 urlsuffix=""
 host=None
@@ -52,9 +53,6 @@ def config_callback(confObject):
      if child.key == 'networks':
        for x in child.values:
          networks.append(x)
-
-   if not urls:
-     raise Exception("URL is not defined in module objects..!!") 
 		
    if not user:
      raise Exception("User is not defined in module objects..!!")	
@@ -82,13 +80,14 @@ def init_callback():
    memoryMetrics = [0, 0, 0, 0]
    sysSpecsMetrics = [0, 0, 0, 0]
 
-   collectd.register_write(write_onos, data=None)
+   #collectd.register_write(write_onos, data=None)
 
 def sendMetrics(arg):
 
    response = cStringIO.StringIO()
    c = pycurl.Curl()
 #   c.setopt(pycurl.URL, urls[0])
+   collectd.info("Report " + arg + " metrics~")
    c.setopt(pycurl.HTTPHEADER, ['Accept: application/json'])
    c.setopt(pycurl.HTTPHEADER, ['Content-Type: application/json'])
    data = json.dumps(dataSelector(arg))
@@ -144,7 +143,7 @@ def dataSelector(Val):
      return ast.literal_eval(data[0])	
 
    if Val=='memory':
-     data.append('{\"memoryUsedPercentage\": \"'+str(memoryMetrics[0])+'\", \"memoryFreePercentage\": \"'+str(memoryMetrics[1])+'\", \"memoryUsed\": \"'+str(memoryMetrics[2])+'\", \"memoryFree\": \"'+str(memoryMetrics[3])+'\"}')
+     data.append('{\"memoryUsedRatio\": \"'+str(memoryMetrics[0])+'\", \"memoryFreeRatio\": \"'+str(memoryMetrics[1])+'\", \"memoryUsed\": \"'+str(memoryMetrics[2])+'\", \"memoryFree\": \"'+str(memoryMetrics[3])+'\"}')
 
      urlsuffix = "/onos/cpman/collector/memory_metrics"
      return ast.literal_eval(data[0])
@@ -182,38 +181,40 @@ def write_onos(v1, data=None):
 	
    global cpuMetrics, memoryMetrics, diskMetrics, networkMetrics
 
-   for c in v1.values:
+   #for c in v1.values:
 
-     for valc in cpuMetricsNames:	
-       if v1.type_instance == valc or v1.type == valc:
-         cpuMetrics[cpuMetricsNames.index(valc)]=str(v1.values[0]).strip('[]')
-		
-     for valm in memoryMetricsNames:
-       if v1.type_instance == valm:
-         memoryMetrics[memoryMetricsNames.index(valm)]=str(v1.values[0]).strip('[]')
+   for valc in cpuMetricsNames:	
+     if v1.type_instance == valc or v1.type == valc:
+       cpuMetrics[cpuMetricsNames.index(valc)]=str(v1.values[0]).strip('[]')
+       sendMetrics("cpu")	
 	
-     for vald in disks:
-       if v1.type == diskMetricsNames[0] and v1.plugin_instance==vald:
-         position = int(disks.index(vald))*2
-         diskMetrics[position] = v1.values[0]
-         diskMetrics[position+1] = v1.values[1]
-	
-     for valn in networks:
-       if v1.type == networkMetricsNames[0] and v1.plugin_instance==valn:
-         position = int(networks.index(valn))*4
-         networkMetrics[position] = v1.values[0]
-         networkMetrics[position+1] = v1.values[1]
+   for valm in memoryMetricsNames:
+     if v1.type_instance == valm:
+       memoryMetrics[memoryMetricsNames.index(valm)]=str(v1.values[0]).strip('[]') 
+       sendMetrics("memory")	
 
-       if v1.type == networkMetricsNames[1] and v1.plugin_instance==valn:
-         position = int(networks.index(valn))*4
-	 networkMetrics[position+2] = v1.values[0]
-         networkMetrics[position+3] = v1.values[1]
+   for vald in disks:
+     if v1.type == diskMetricsNames[0] and v1.plugin_instance==vald:
+       position = int(disks.index(vald))*2
+       diskMetrics[position] = v1.values[0]
+       diskMetrics[position+1] = v1.values[1]
+       sendMetrics("disks")
 	
-   sendMetrics("sysspecs")
-   sendMetrics("cpu")
-   sendMetrics("memory")
-   sendMetrics("disks")
-   sendMetrics("networks")
+   for valn in networks:
+     if v1.type == networkMetricsNames[0] and v1.plugin_instance==valn:
+       position = int(networks.index(valn))*4
+       networkMetrics[position] = v1.values[0]
+       networkMetrics[position+1] = v1.values[1]
+       sendMetrics("networks")
+
+     if v1.type == networkMetricsNames[1] and v1.plugin_instance==valn:
+       position = int(networks.index(valn))*4 
+       networkMetrics[position+2] = v1.values[0]
+       networkMetrics[position+3] = v1.values[1]
+       sendMetrics("networks")
+	
+   #sendMetrics("sysspecs")
 		
 collectd.register_config(config_callback);
 collectd.register_init(init_callback);
+collectd.register_write(write_onos);
